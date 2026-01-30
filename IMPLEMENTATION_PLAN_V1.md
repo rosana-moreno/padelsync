@@ -1,6 +1,6 @@
 # Padelsync V1 Implementation Plan
 
-**Overall Progress:** `14%` (1 of 7 phases complete)
+**Overall Progress:** `28%` (2 of 7 phases complete)
 
 ## TLDR
 
@@ -93,15 +93,23 @@ Key architectural/implementation choices based on confirmed product rules:
 
 **Goal:** Implement tournament list page, tournament creation flow, and basic tournament detail skeleton.
 
+**Status:** 🟩 **DONE**
+
+**Phase 2 Accepted:** ✅ Tournament list, creation flow, detail skeleton, and supporting components are complete. Sorting by `tournamentDate` is implemented and dev-only seed data is available. No player/pair/match features have started (Phase 3 not started).
+
 **Scope:**
 - ✅ TournamentList page - displays all tournaments
 - ✅ CreateTournament page - form to create new tournament
 - ✅ TournamentCard component - displays tournament summary
 - ✅ Load tournament summaries from localStorage
 - ✅ Create new tournament → save → navigate to detail
-- ✅ Basic tournament settings (name, description, maxPlayers, location: clubName/address/phone/contactPerson)
+- ✅ Basic tournament settings (name, description, tournamentDate, maxPlayers, location: clubName/address/phone/contactPerson)
 - ✅ TournamentDetail page skeleton - main tournament view structure
 - ✅ Basic layout and navigation
+- ✅ Sort by tournamentDate (upcoming first)
+- ✅ Required tournamentDate
+- ✅ Location fields: clubName/address required; phone optional; contactPerson optional
+- ✅ Dev-only seed demo data (idempotent, non-destructive)
 - ❌ No player/pair management yet
 - ❌ No match features yet
 

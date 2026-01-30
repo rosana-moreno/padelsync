@@ -88,6 +88,7 @@ function normalizeTournament(tournament: Tournament): Tournament {
     phone: '',
     contactPerson: undefined,
   };
+  const normalizedTournamentDate = tournament.tournamentDate ?? '';
 
   const normalizedPlayers = tournament.players.map((player) => ({
     ...player,
@@ -96,6 +97,7 @@ function normalizeTournament(tournament: Tournament): Tournament {
 
   return {
     ...tournament,
+    tournamentDate: normalizedTournamentDate,
     location: normalizedLocation,
     players: normalizedPlayers,
   };
@@ -173,6 +175,8 @@ export function updateTournamentSummary(tournament: Tournament): void {
     id: tournament.id,
     name: tournament.name,
     status: tournament.status,
+    tournamentDate: tournament.tournamentDate,
+    clubName: tournament.location.clubName,
     playerCount: tournament.players.length,
     matchCount: tournament.matches.length,
     createdAt: tournament.createdAt,

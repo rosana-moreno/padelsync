@@ -83,10 +83,11 @@ export interface Tournament {
   description?: string;
   status: TournamentStatus;
   playersLocked: boolean; // Controls structural edits - becomes true when tournament starts, irreversible
+  tournamentDate: string; // REQUIRED (ISO date or timestamp)
   location: {
     clubName: string; // REQUIRED
     address: string; // REQUIRED (used for maps later)
-    phone: string; // REQUIRED
+    phone?: string; // OPTIONAL
     contactPerson?: string; // OPTIONAL
   };
   createdAt: string;
@@ -127,6 +128,8 @@ export interface TournamentSummary {
   id: ID;
   name: string;
   status: TournamentStatus;
+  tournamentDate: string; // REQUIRED (ISO date or timestamp)
+  clubName: string; // REQUIRED (from location)
   playerCount: number;
   matchCount: number;
   createdAt: string;

@@ -10,8 +10,8 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<TournamentList />} />
-          <Route path="/tournament/new" element={<CreateTournament />} />
-          <Route path="/tournament/:id" element={<TournamentDetail />} />
+          <Route path="/tournaments/new" element={<CreateTournament />} />
+          <Route path="/tournaments/:id" element={<TournamentDetail />} />
         </Routes>
       </Layout>
     </BrowserRouter>
