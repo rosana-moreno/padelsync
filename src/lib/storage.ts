@@ -1,7 +1,8 @@
-import type { Tournament, TournamentSummary } from './types';
+import type { Player, Tournament, TournamentSummary } from './types';
 
 const STORAGE_VERSION = '1.1';
 const TOURNAMENTS_KEY = 'padelsync_tournaments';
+const PLAYERS_KEY = 'padelsync_players';
 const VERSION_KEY = 'padelsync_version';
 const TOURNAMENT_PREFIX = 'padelsync_tournament_';
 
@@ -89,17 +90,19 @@ function normalizeTournament(tournament: Tournament): Tournament {
     contactPerson: undefined,
   };
   const normalizedTournamentDate = tournament.tournamentDate ?? '';
-
-  const normalizedPlayers = tournament.players.map((player) => ({
-    ...player,
-    phone: player.phone ?? '',
-  }));
+  const normalizedPlayerIds = tournament.playerIds ?? [];
+  const normalizedWaitingListIds = tournament.waitingListIds ?? [];
+  const normalizedPairs = (tournament.pairs ?? []).filter(
+    (pair) => pair.player1Id && pair.player2Id
+  );
 
   return {
     ...tournament,
     tournamentDate: normalizedTournamentDate,
     location: normalizedLocation,
-    players: normalizedPlayers,
+    playerIds: normalizedPlayerIds,
+    waitingListIds: normalizedWaitingListIds,
+    pairs: normalizedPairs,
   };
 }
 
@@ -177,7 +180,7 @@ export function updateTournamentSummary(tournament: Tournament): void {
     status: tournament.status,
     tournamentDate: tournament.tournamentDate,
     clubName: tournament.location.clubName,
-    playerCount: tournament.players.length,
+    playerCount: tournament.playerIds.length,
     matchCount: tournament.matches.length,
     createdAt: tournament.createdAt,
   };
@@ -205,4 +208,60 @@ export function removeTournamentSummary(id: string): void {
   const summaries = loadTournamentSummaries();
   const filtered = summaries.filter(s => s.id !== id);
   saveTournamentSummaries(filtered);
+}
+
+/**
+ * Load all global players from localStorage
+ */
+export function loadPlayers(): Player[] {
+  if (!isStorageAvailable()) return [];
+  try {
+    const data = localStorage.getItem(PLAYERS_KEY);
+    if (!data) return [];
+    return JSON.parse(data) as Player[];
+  } catch (error) {
+    console.error('Failed to load players:', error);
+    return [];
+  }
+}
+
+/**
+ * Save global players to localStorage
+ */
+export function savePlayers(players: Player[]): void {
+  if (!isStorageAvailable()) return;
+  try {
+    localStorage.setItem(PLAYERS_KEY, JSON.stringify(players));
+  } catch (error) {
+    console.error('Failed to save players:', error);
+    throw error;
+  }
+}
+
+/**
+ * Add a global player (idempotent by ID)
+ */
+export function addPlayer(player: Player): void {
+  const players = loadPlayers();
+  const exists = players.some((p) => p.id === player.id);
+  if (exists) return;
+  savePlayers([...players, player]);
+}
+
+/**
+ * Update a global player (by ID)
+ */
+export function updatePlayer(player: Player): void {
+  const players = loadPlayers();
+  const updated = players.map((p) => (p.id === player.id ? player : p));
+  savePlayers(updated);
+}
+
+/**
+ * Delete a global player (by ID)
+ */
+export function deletePlayer(id: string): void {
+  const players = loadPlayers();
+  const filtered = players.filter((p) => p.id !== id);
+  savePlayers(filtered);
 }

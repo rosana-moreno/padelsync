@@ -76,7 +76,8 @@ export default function CreateTournament() {
       },
       createdAt: now,
       updatedAt: now,
-      players: [],
+      playerIds: [],
+      waitingListIds: [],
       pairs: [],
       matches: [],
       settings: {

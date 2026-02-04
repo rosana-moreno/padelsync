@@ -1,6 +1,6 @@
 # Padelsync V1 Implementation Plan
 
-**Overall Progress:** `28%` (2 of 7 phases complete)
+**Overall Progress:** `43%` (3 of 7 phases complete)
 
 ## TLDR
 
@@ -95,7 +95,7 @@ Key architectural/implementation choices based on confirmed product rules:
 
 **Status:** 🟩 **DONE**
 
-**Phase 2 Accepted:** ✅ Tournament list, creation flow, detail skeleton, and supporting components are complete. Sorting by `tournamentDate` is implemented and dev-only seed data is available. No player/pair/match features have started (Phase 3 not started).
+**Phase 2 Accepted:** ✅ Tournament list, creation flow, detail skeleton, and supporting components are complete. Sorting by `tournamentDate` is implemented and dev-only seed data is available. Player/pair/match features were completed in Phase 3.
 
 **Scope:**
 - ✅ TournamentList page - displays all tournaments
@@ -133,49 +133,52 @@ Key architectural/implementation choices based on confirmed product rules:
 
 ## Phase 3: Player & Pair Management with Waiting List
 
-**Goal:** Implement complete player and pair management including waiting list display and manual player replacement.
+**Goal:** Implement global players, tournament registration (singles/doubles), pairs, and waiting list display.
+
+**Status:** 🟩 **DONE**
+
+**Phase 3 Accepted:** ✅ Global player storage, registration (singles/doubles), pairs, waiting list, and removal flows are complete. Matches, rankings, and gender-based rules are not implemented.
 
 **Scope:**
-- ✅ PlayerList component - displays all players
-- ✅ PlayerForm component - add new player
-- ✅ Waiting list display (players exceeding maxPlayers)
-- ✅ FIFO waiting list ordering
-- ✅ Remove player functionality
-- ✅ Manual player replacement - admin can replace a player with someone from waiting list
-- ✅ Replacement UI (select player to replace, select replacement from waiting list)
-- ✅ PairList component - displays all pairs
-- ✅ PairEditor component - create/edit pairs
-- ✅ Support incomplete pairs (player2Id === null)
-- ✅ Auto-pairing UI (create pair from single player)
-- ✅ Display pair names (computed from player names)
-- ✅ Enforce playersLocked rule (disable editing when locked)
-- ✅ Visual indicators for locked state
-- ❌ No match generation yet
-- ❌ No pair completion logic yet (deferred to match generation)
+- ✅ Global players (shared across tournaments)
+- ✅ Tournaments store `playerIds` and `waitingListIds` only (no embedded players)
+- ✅ Singles registration (adds to playerIds or waitingListIds)
+- ✅ Doubles registration (creates tournament-scoped pairs)
+- ✅ Waiting list visible when maxPlayers exceeded (read-only)
+- ✅ Pair removals and remove-one-from-pair flows
+- ✅ pairs are tournament-scoped and always have exactly two players
+- ✅ Player.gender optional (not used in rules)
+- ✅ DEV-only seed demo data (TournamentList creates fully filled demo tournaments)
+- ❌ Matches not implemented
+- ❌ Rankings not implemented
+- ❌ Gender-based match rules not implemented
+
+**DEV Seed Behavior (Phase 3):**
+- ✅ TournamentList “Seed demo data” creates two demo tournaments:
+  - Padelsync Demo Open (mixed men + women)
+  - Weekend Cup (men only)
+- ✅ Each demo tournament is pre-filled:
+  - `playerIds` up to `maxPlayers`
+  - `waitingListIds` with overflow (+4)
+- ✅ Idempotent + non-destructive:
+  - Fixed IDs for demo tournaments and demo players
+  - Repeated clicks do not duplicate or overwrite existing data
+- ✅ TournamentDetail DEV buttons still available (seed players / fill tournament)
 
 **Key Components/Files:**
-- `src/components/tournament/PlayerList.tsx` - Player list with waiting list section
-- `src/components/tournament/PlayerForm.tsx` - Add player form
-- `src/components/tournament/PlayerReplacement.tsx` - Replace player UI (select player + waiting list member)
-- `src/components/tournament/PairList.tsx` - Pair list display
-- `src/components/tournament/PairEditor.tsx` - Create/edit pair form/modal
-- `src/components/ui/` - List, Badge, Select components
-- Update `src/hooks/useTournament.ts` - Add player/pair mutation functions including replacePlayer
-- Helper functions to compute pair names from player IDs
+- `src/lib/types.ts` - Player, Pair, Tournament ID-based relationships
+- `src/lib/storage.ts` - Global player storage + tournament normalization
+- `src/lib/seed.ts` - Dev-only player and tournament fill helpers
+- `src/hooks/useTournament.ts` - Registration + removal mutations
+- `src/pages/TournamentDetail.tsx` - Registration UI, pairs, waiting list, removals
 
 **Main Risks & Mitigations:**
 - **Risk:** playersLocked check not enforced
-  - **Mitigation:** Disable UI controls when `playersLocked === true`, add validation in hook
+  - **Mitigation:** Disable UI controls when `playersLocked === true`, validate in hook
 - **Risk:** Waiting list calculation incorrect
-  - **Mitigation:** Calculate based on `players.length > settings.maxPlayers`, test edge cases (no maxPlayers, exact match)
-- **Risk:** Player removal breaks references
-  - **Mitigation:** Prevent removal when `playersLocked === true`, validate in hook
-- **Risk:** Player replacement not updating all references
-  - **Mitigation:** Update player ID in all pairs that reference the replaced player, validate references
-- **Risk:** Pair editing allowed when playersLocked
-  - **Mitigation:** Disable edit controls, validate in hook, show clear message
-- **Risk:** Incomplete pairs not clearly displayed
-  - **Mitigation:** Visual indicator (badge/icon) for incomplete pairs, show "Waiting for partner"
+  - **Mitigation:** Use `settings.maxPlayers`, test overflow cases
+- **Risk:** Pair integrity breaks on removal
+  - **Mitigation:** Remove pair whenever one member is removed
 
 ---
 
