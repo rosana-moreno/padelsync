@@ -32,7 +32,9 @@ export interface Player {
   id: ID;
   name: string;
   phone: string; // Required for V1.1
-  email?: string; // Optional for V1, may be used for contact
+  email?: string; // Optional
+  gender?: 'female' | 'male'; // Optional
+  courtPosition?: 'drive' | 'backhand' | 'indifferent'; // Optional (default: indifferent)
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
 }
@@ -45,7 +47,7 @@ export interface Player {
 export interface Pair {
   id: ID;
   player1Id: ID; // Required
-  player2Id: ID | null; // null = waiting for partner (auto-generated pair)
+  player2Id: ID; // Required
   createdAt: string;
   updatedAt: string;
   // Denormalized for display (optional, can be computed)
@@ -93,9 +95,9 @@ export interface Tournament {
   createdAt: string;
   updatedAt: string;
   
-  // Embedded entities (for simplicity in V1)
-  // Alternative: store IDs and join, but localStorage makes embedded easier
-  players: Player[];
+  // Registered and waiting list players (global player IDs)
+  playerIds: ID[];
+  waitingListIds: ID[];
   pairs: Pair[];
   matches: Match[];
   

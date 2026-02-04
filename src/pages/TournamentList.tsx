@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import { loadTournamentSummaries } from '@/lib/storage';
-import { seedDemoTournaments } from '@/lib/seed';
+import { seedDemoData } from '@/lib/seed';
 import type { TournamentSummary } from '@/lib/types';
 
 export default function TournamentList() {
@@ -21,10 +21,8 @@ export default function TournamentList() {
   }, []);
 
   const handleSeed = () => {
-    const result = seedDemoTournaments();
-    if (result.created > 0) {
-      refreshSummaries();
-    }
+    seedDemoData();
+    refreshSummaries();
   };
 
   const sortedSummaries = useMemo(() => {

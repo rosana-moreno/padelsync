@@ -170,6 +170,8 @@ interface Player {
   name: string;
   phone: string; // REQUIRED
   email?: string; // Optional for V1, may be used for contact
+  gender?: 'female' | 'male'; // Optional
+  courtPosition?: 'drive' | 'backhand' | 'indifferent'; // Optional
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
 }
@@ -182,7 +184,7 @@ interface Player {
 interface Pair {
   id: ID;
   player1Id: ID; // Required
-  player2Id: ID | null; // null = waiting for partner (auto-generated pair)
+  player2Id: ID; // Required
   createdAt: string;
   updatedAt: string;
   // Denormalized for display (optional, can be computed)
@@ -227,10 +229,10 @@ interface Tournament {
   };
   createdAt: string;
   updatedAt: string;
-  
-  // Embedded entities (for simplicity in V1)
-  // Alternative: store IDs and join, but localStorage makes embedded easier
-  players: Player[];
+ 
+  // ID-based relationships (global players)
+  playerIds: ID[];
+  waitingListIds: ID[];
   pairs: Pair[];
   matches: Match[];
   
@@ -280,12 +282,11 @@ interface TournamentSummary {
   - Supports auto-pairing workflow (one player → pair with null partner)
 
 **2. Embedded vs Referenced:**
-- **Decision:** Embedded entities in Tournament (players, pairs, matches)
+- **Decision:** Referenced players (IDs) in Tournament
 - **Rationale:**
-  - V1 is single-tournament focused
-  - localStorage is simpler with embedded data
-  - No cross-tournament relationships needed
-  - Can refactor to references later if needed
+  - Players are global across tournaments
+  - Tournaments store only IDs for registration + waiting list
+  - Pairs remain tournament-scoped
 
 **3. Rankings: Derived vs Stored:**
 - **Decision:** Derived (computed on demand)
@@ -344,8 +345,14 @@ interface TournamentSummary {
 ```
 padelsync_tournaments        → Array<TournamentSummary>
 padelsync_tournament_{id}    → Tournament (full object)
+padelsync_players            → Array<Player>
 padelsync_version            → "1.1" (for future migrations)
 ```
+
+**DEV Seed Helpers (V1):**
+- DEV-only seed helpers create demo tournaments + players using fixed IDs
+- Demo data is created via storage helpers (same plumbing as real usage)
+- Idempotent + non-destructive (no duplicates, no overwrites)
 
 **Storage Structure:**
 - One key per tournament (for performance)
